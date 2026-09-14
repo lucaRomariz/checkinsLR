@@ -1,4 +1,4 @@
-export type Role = 'USER' | 'ADMIN';
+export type Role = "USER" | "ADMIN";
 
 export interface Profile {
   id: string;
@@ -37,8 +37,12 @@ export interface Checkin {
   created_at: string;
   start_time: string | null;
   end_time: string | null;
-  profiles?: Profile;
-  categories?: Category;
+  planning_item_id: string | null;
+  like_count?: number;
+  comment_count?: number;
+  liked?: boolean;
+  profiles?: Pick<Profile, "id" | "username" | "display_name">;
+  categories?: Pick<Category, "id" | "name" | "icon" | "color">;
   checkin_likes?: { user_id: string }[];
   checkin_comments?: { id: string }[];
 }
@@ -58,4 +62,18 @@ export interface RankingRow {
   display_name: string;
   avatar_url: string | null;
   checkin_count: number;
+}
+
+export interface PlanningItem {
+  id: string;
+  user_id: string;
+  category_id: string;
+  title: string;
+  notes: string | null;
+  planned_date: string;
+  start_time: string | null;
+  end_time: string | null;
+  cancelled: boolean;
+  categories: Pick<Category, "id" | "name" | "icon" | "color"> | null;
+  checkins: { id: string } | null;
 }

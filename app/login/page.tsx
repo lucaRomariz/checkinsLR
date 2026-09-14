@@ -1,28 +1,30 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { createClient } from '@/lib/supabase/client';
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
 
 export default function LoginPage() {
   const router = useRouter();
   const supabase = createClient();
 
-  const [mode, setMode] = useState<'signin' | 'signup'>('signin');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [username, setUsername] = useState('');
-  const [displayName, setDisplayName] = useState('');
+  const [mode, setMode] = useState<"signin" | "signup">("signin");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [username, setUsername] = useState("");
+  const [displayName, setDisplayName] = useState("");
   const [loading, setLoading] = useState(false);
+  const [notice, setNotice] = useState("");
   const [error, setError] = useState<string | null>(null);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
     setError(null);
+    setNotice("");
 
-    if (mode === 'signup') {
-      const { error } = await supabase.auth.signUp({
+    if (mode === "signup") {
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -37,8 +39,18 @@ export default function LoginPage() {
         setLoading(false);
         return;
       }
+      if (!data.session) {
+        setNotice(
+          "Conta criada. Confira seu e-mail para confirmar o cadastro e depois entre.",
+        );
+        setLoading(false);
+        return;
+      }
     } else {
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
       if (error) {
         setError(error.message);
         setLoading(false);
@@ -46,7 +58,7 @@ export default function LoginPage() {
       }
     }
 
-    router.push('/');
+    router.push("/");
     router.refresh();
   }
 
@@ -55,11 +67,13 @@ export default function LoginPage() {
       <div className="w-full max-w-sm">
         <h1 className="mb-1 text-2xl font-semibold">Check-ins</h1>
         <p className="mb-8 text-sm text-muted">
-          {mode === 'signin' ? 'Entre para ver o que o pessoal fez hoje.' : 'Crie sua conta.'}
+          {mode === "signin"
+            ? "Entre para ver o que o pessoal fez hoje."
+            : "Crie sua conta."}
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-3">
-          {mode === 'signup' && (
+          {mode === "signup" && (
             <>
               <input
                 className="w-full rounded-xl px-4 py-3 text-sm outline-none"
@@ -94,6 +108,11 @@ export default function LoginPage() {
             minLength={6}
           />
 
+          {notice && (
+            <p role="status" className="text-sm text-emerald-300">
+              {notice}
+            </p>
+          )}
           {error && <p className="text-sm text-red-400">{error}</p>}
 
           <button
@@ -101,15 +120,21 @@ export default function LoginPage() {
             disabled={loading}
             className="w-full rounded-xl bg-white py-3 text-sm font-medium text-black transition hover:opacity-90 disabled:opacity-50"
           >
-            {loading ? 'Aguarde...' : mode === 'signin' ? 'Entrar' : 'Criar conta'}
+            {loading
+              ? "Aguarde..."
+              : mode === "signin"
+                ? "Entrar"
+                : "Criar conta"}
           </button>
         </form>
 
         <button
-          onClick={() => setMode(mode === 'signin' ? 'signup' : 'signin')}
+          onClick={() => setMode(mode === "signin" ? "signup" : "signin")}
           className="mt-6 w-full text-center text-sm text-muted hover:text-accent"
         >
-          {mode === 'signin' ? 'Não tem conta? Criar uma' : 'Já tem conta? Entrar'}
+          {mode === "signin"
+            ? "Não tem conta? Criar uma"
+            : "Já tem conta? Entrar"}
         </button>
       </div>
     </div>

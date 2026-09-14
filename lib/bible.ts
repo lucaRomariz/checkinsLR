@@ -1,4 +1,5 @@
-'use client';
+"use client";
+import { todayKey } from "./dates";
 
 export interface DailyVerse {
   reference: string;
@@ -6,11 +7,7 @@ export interface DailyVerse {
   translation: string;
 }
 
-const CACHE_KEY_PREFIX = 'verse-of-day:';
-
-function todayKey() {
-  return new Date().toISOString().slice(0, 10);
-}
+const CACHE_KEY_PREFIX = "verse-of-day:";
 
 /**
  * bible-api.com's random endpoint shape has varied a bit over time, so we parse
@@ -31,10 +28,13 @@ function parseRandomResponse(data: any): DailyVerse | null {
     (book && chapter && verse ? `${book} ${chapter}:${verse}` : undefined);
 
   const translation: string =
-    data?.translation?.name ?? data?.translation_name ?? data?.translation?.identifier ?? '';
+    data?.translation?.name ??
+    data?.translation_name ??
+    data?.translation?.identifier ??
+    "";
 
   return {
-    reference: reference ?? '',
+    reference: reference ?? "",
     text: text.trim(),
     translation,
   };
@@ -45,7 +45,9 @@ function parseRandomResponse(data: any): DailyVerse | null {
  * Defaults to the Almeida (Portuguese) translation since the app is in pt-BR.
  * Falls back to WEB (English) if the Portuguese endpoint fails.
  */
-export async function getVerseOfTheDay(translation: string = 'almeida'): Promise<DailyVerse | null> {
+export async function getVerseOfTheDay(
+  translation: string = "almeida",
+): Promise<DailyVerse | null> {
   const cacheKey = `${CACHE_KEY_PREFIX}${translation}:${todayKey()}`;
 
   try {
@@ -56,7 +58,9 @@ export async function getVerseOfTheDay(translation: string = 'almeida'): Promise
   }
 
   const tryFetch = async (t: string) => {
-    const res = await fetch(`https://bible-api.com/data/${t}/random`);
+    const res = await fetch(`https://bible-api.com/data/${t}/random`, {
+      signal: AbortSignal.timeout(5000),
+    });
     if (!res.ok) throw new Error(`bible-api ${res.status}`);
     const data = await res.json();
     return parseRandomResponse(data);
@@ -67,7 +71,7 @@ export async function getVerseOfTheDay(translation: string = 'almeida'): Promise
     verse = await tryFetch(translation);
   } catch {
     try {
-      verse = await tryFetch('web');
+      verse = await tryFetch("web");
     } catch {
       verse = null;
     }
@@ -85,9 +89,14 @@ export async function getVerseOfTheDay(translation: string = 'almeida'): Promise
 }
 
 /** Fetches a fresh random verse, bypassing the daily cache (for "outro versículo"). */
-export async function getRandomVerse(translation: string = 'almeida'): Promise<DailyVerse | null> {
+export async function getRandomVerse(
+  translation: string = "almeida",
+): Promise<DailyVerse | null> {
   try {
-    const res = await fetch(`https://bible-api.com/data/${translation}/random`);
+    const res = await fetch(
+      `https://bible-api.com/data/${translation}/random`,
+      { signal: AbortSignal.timeout(5000) },
+    );
     if (!res.ok) throw new Error(`bible-api ${res.status}`);
     const data = await res.json();
     return parseRandomResponse(data);

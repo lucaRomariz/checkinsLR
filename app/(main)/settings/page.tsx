@@ -1,29 +1,24 @@
-import { redirect } from 'next/navigation';
-import { createClient } from '@/lib/supabase/server';
-import SettingsForm from '@/components/SettingsForm';
-import type { Category, Profile, SystemSetting } from '@/lib/types';
+import { redirect } from "next/navigation";
+import { getSession } from "@/lib/session";
+import SettingsForm from "@/components/SettingsForm";
+import type { Category, Profile, SystemSetting } from "@/lib/types";
 
 export default async function SettingsPage() {
-  const supabase = createClient();
+  const { supabase, profile } = await getSession();
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('auth_user_id', user!.id)
-    .single<Profile>();
-
-  if (!profile || profile.role !== 'ADMIN') {
-    redirect('/');
+  if (!profile || profile.role !== "ADMIN") {
+    redirect("/");
   }
 
-  const [{ data: settings }, { data: categories }, { data: admins }] = await Promise.all([
-    supabase.from('system_settings').select('*').order('setting_key'),
-    supabase.from('categories').select('*').order('sort_order'),
-    supabase.from('profiles').select('*').eq('role', 'ADMIN'),
+  const results = await Promise.all([
+    supabase.from("system_settings").select("*").order("setting_key"),
+    supabase.from("categories").select("*").order("sort_order"),
+    supabase.from("profiles").select("*").eq("role", "ADMIN"),
   ]);
+
+  if (results.some((r) => r.error))
+    throw new Error("Não foi possível carregar as configurações.");
+  const [{ data: settings }, { data: categories }, { data: admins }] = results;
 
   return (
     <div>

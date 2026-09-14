@@ -1,5 +1,5 @@
-import Image from 'next/image';
-import { Heart } from 'lucide-react';
+import Image from "next/image";
+import { Heart } from "lucide-react";
 
 export default function WeddingBanner() {
   return (
@@ -10,7 +10,10 @@ export default function WeddingBanner() {
           alt="Luca e Roberta"
           fill
           className="object-cover"
-          style={{ objectPosition: '50% 32%', filter: 'brightness(1.45) contrast(1.05) saturate(1.1)' }}
+          style={{
+            objectPosition: "50% 32%",
+            filter: "brightness(1.45) contrast(1.05) saturate(1.1)",
+          }}
           priority
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-transparent" />
@@ -20,7 +23,9 @@ export default function WeddingBanner() {
           <Heart size={12} className="fill-pink-300 text-pink-300" />
           Rumo ao casamento
         </p>
-        <p className="mt-1 text-sm text-white/90">Um dia de cada vez, juntos.</p>
+        <p className="mt-1 text-sm text-white/90">
+          Um dia de cada vez, juntos.
+        </p>
       </div>
     </div>
   );

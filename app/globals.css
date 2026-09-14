@@ -33,7 +33,11 @@ select {
   width: 3px;
   height: 3px;
   border-radius: 999px;
-  background: radial-gradient(circle, rgba(255, 220, 170, 0.9) 0%, rgba(255, 220, 170, 0) 70%);
+  background: radial-gradient(
+    circle,
+    rgba(255, 220, 170, 0.9) 0%,
+    rgba(255, 220, 170, 0) 70%
+  );
   box-shadow: 0 0 6px 1px rgba(255, 210, 150, 0.5);
   animation: twinkle 4s ease-in-out infinite;
 }
@@ -47,5 +51,52 @@ select {
   50% {
     opacity: 1;
     transform: scale(1.4);
+  }
+}
+
+@layer components {
+  .page-header {
+    @apply border-b border-border/60 px-5 py-6;
+  }
+  .page-header h1 {
+    @apply text-2xl font-semibold tracking-tight;
+  }
+  .eyebrow {
+    @apply mb-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-muted;
+  }
+  .field {
+    @apply flex flex-col gap-2 text-sm text-muted;
+  }
+  .field input,
+  .field select,
+  .field textarea {
+    @apply min-w-0 w-full rounded-xl px-3 py-3 text-sm text-accent;
+  }
+  .icon-button {
+    @apply flex h-10 w-10 shrink-0 items-center justify-center rounded-xl hover:bg-surface2;
+  }
+}
+:focus-visible {
+  outline: 2px solid #6ee7b7;
+  outline-offset: 3px;
+}
+button:disabled {
+  cursor: wait;
+}
+progress::-webkit-progress-bar {
+  background: #242a27;
+  border-radius: 999px;
+}
+progress::-webkit-progress-value {
+  background: #6ee7b7;
+  border-radius: 999px;
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
   }
 }

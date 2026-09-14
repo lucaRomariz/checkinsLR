@@ -1,11 +1,11 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { Heart } from 'lucide-react';
-import { createClient } from '@/lib/supabase/client';
-import type { Profile } from '@/lib/types';
+import { useEffect, useState } from "react";
+import { Heart } from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
+import type { Profile } from "@/lib/types";
 
-const COUPLE_USERNAMES = ['luca.romariz', 'roberta.araujo'];
+const COUPLE_USERNAMES = ["luca.romariz", "roberta.araujo"];
 
 export default function CoupleStreak() {
   const supabase = createClient();
@@ -14,15 +14,15 @@ export default function CoupleStreak() {
 
   useEffect(() => {
     supabase
-      .from('profiles')
-      .select('*')
-      .in('username', COUPLE_USERNAMES)
+      .from("profiles")
+      .select("*")
+      .in("username", COUPLE_USERNAMES)
       .then(async ({ data }) => {
         const profiles = (data as Profile[]) ?? [];
         if (profiles.length !== 2) return; // only show once both accounts exist
         setPair(profiles);
 
-        const { data: s } = await supabase.rpc('get_couple_streak', {
+        const { data: s } = await supabase.rpc("get_couple_streak", {
           p_user_a: profiles[0].id,
           p_user_b: profiles[1].id,
         });
@@ -37,8 +37,14 @@ export default function CoupleStreak() {
   return (
     <div className="relative mx-4 my-3 overflow-hidden rounded-xl2 border border-pink-900/30 bg-gradient-to-br from-pink-950/20 via-surface to-orange-950/10 px-4 py-4">
       {/* soft floating hearts, purely decorative */}
-      <Heart size={54} className="pointer-events-none absolute -right-3 -top-3 rotate-12 text-pink-500/10" />
-      <Heart size={28} className="pointer-events-none absolute bottom-1 right-10 -rotate-12 text-pink-500/10" />
+      <Heart
+        size={54}
+        className="pointer-events-none absolute -right-3 -top-3 rotate-12 text-pink-500/10"
+      />
+      <Heart
+        size={28}
+        className="pointer-events-none absolute bottom-1 right-10 -rotate-12 text-pink-500/10"
+      />
 
       <div className="relative flex items-center gap-3">
         <div className="flex -space-x-2">
@@ -51,14 +57,20 @@ export default function CoupleStreak() {
         </div>
         <div>
           <p className="text-sm font-medium">
-            {a.display_name.split(' ')[0]} <Heart size={12} className="mb-0.5 inline fill-pink-400 text-pink-400" />{' '}
-            {b.display_name.split(' ')[0]}
+            {a.display_name.split(" ")[0]}{" "}
+            <Heart
+              size={12}
+              className="mb-0.5 inline fill-pink-400 text-pink-400"
+            />{" "}
+            {b.display_name.split(" ")[0]}
           </p>
           <p className="text-xs text-muted">
             {streak > 0 ? (
-              <>🔥 {streak} {streak === 1 ? 'dia' : 'dias'} juntos</>
+              <>
+                🔥 {streak} {streak === 1 ? "dia" : "dias"} juntos
+              </>
             ) : (
-              'Comecem hoje, juntos'
+              "Comecem hoje, juntos"
             )}
           </p>
         </div>

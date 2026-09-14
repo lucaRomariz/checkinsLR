@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { RefreshCw } from 'lucide-react';
-import { getVerseOfTheDay, getRandomVerse, type DailyVerse } from '@/lib/bible';
+import { useEffect, useState } from "react";
+import { RefreshCw } from "lucide-react";
+import { getVerseOfTheDay, getRandomVerse, type DailyVerse } from "@/lib/bible";
 
 export default function VerseCard({
   onUse,
@@ -41,20 +41,26 @@ export default function VerseCard({
 
   return (
     <div
-      className={`mx-4 ${compact ? 'my-2' : 'my-3'} rounded-xl2 border border-orange-900/30 bg-gradient-to-br from-orange-950/25 to-surface px-4 py-4`}
+      className={`mx-4 ${compact ? "my-2" : "my-3"} rounded-xl2 border border-orange-900/30 bg-gradient-to-br from-orange-950/25 to-surface px-4 py-4`}
     >
       <div className="mb-2 flex items-center justify-between">
         <span className="text-xs font-medium uppercase tracking-wide text-orange-300/80">
           ✝️ Versículo de hoje
         </span>
-        <button onClick={shuffle} className="text-muted transition hover:text-accent" title="Outro versículo">
+        <button
+          onClick={shuffle}
+          className="text-muted transition hover:text-accent"
+          title="Outro versículo"
+        >
           <RefreshCw size={14} />
         </button>
       </div>
-      <p className="text-sm italic leading-relaxed text-accent/90">&ldquo;{verse.text}&rdquo;</p>
+      <p className="text-sm italic leading-relaxed text-accent/90">
+        &ldquo;{verse.text}&rdquo;
+      </p>
       <p className="mt-2 text-xs text-muted">
         {verse.reference}
-        {verse.translation ? ` · ${verse.translation}` : ''}
+        {verse.translation ? ` · ${verse.translation}` : ""}
       </p>
       {onUse && (
         <button
