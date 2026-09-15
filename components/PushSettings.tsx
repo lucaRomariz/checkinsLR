@@ -71,7 +71,7 @@ export default function PushSettings() {
         sub = await registration.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey });
         const { error } = await supabase.rpc("register_push_subscription", { p_subscription: sub.toJSON() });
         if (error) { await sub.unsubscribe(); throw new Error("A permissão foi concedida, mas não conseguimos cadastrar o aparelho. Tente ativar novamente."); }
-        setEnabled(true); setMessage("Tudo pronto! Você receberá avisos dos novos check-ins de outras pessoas do app.");
+        setEnabled(true); setMessage("Tudo pronto! Você receberá novos check-ins e lembretes da sua agenda.");
       }
     } catch (err) { setMessage(err instanceof Error ? err.message : "Não foi possível alterar as notificações."); }
     finally { setBusy(false); }
@@ -94,11 +94,17 @@ export default function PushSettings() {
     <section className="rounded-2xl border border-border bg-surface p-5">
       <Bell className="mb-3 text-emerald-300" aria-hidden="true" />
       <h2 className="text-lg font-semibold">Uma conquista nova? A gente avisa ✨</h2>
-      <p className="mt-2 text-sm leading-relaxed text-muted">Receba um aviso quando outra pessoa publicar. Toque na notificação para abrir a atividade. Seus próprios check-ins não geram avisos para você.</p>
+      <p className="mt-2 text-sm leading-relaxed text-muted">Receba avisos quando outra pessoa publicar e lembretes no início das suas atividades da agenda. Toque para abrir o check-in ou o dia planejado.</p>
       <p className="mt-3 text-sm">{!ready ? "Preparando notificações…" : enabled ? "Ativadas neste aparelho" : "Desativadas neste aparelho"}</p>
       {ready && ios && !installed ? <p className="mt-3 text-sm text-emerald-300">Primeiro, adicione o app à tela inicial seguindo os passos abaixo.</p> : ready && !supported ? <p className="mt-3 text-sm text-muted">Este navegador não permite notificações aqui. Abra o endereço publicado no Safari do iPhone ou em um navegador atualizado no Android.</p> : <button onClick={toggle} disabled={!ready || busy || !registration || !publicKey} className="mt-4 flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-emerald-300 px-4 py-3 font-medium text-black disabled:opacity-50">{enabled ? <BellOff size={18} /> : <Bell size={18} />}{busy ? "Aguarde…" : enabled ? "Desativar neste aparelho" : "Ativar notificações"}</button>}
       {enabled && <button type="button" disabled={busy} onClick={testNotification} className="mt-3 min-h-12 w-full rounded-xl border border-border px-4 py-3 text-sm">Testar aviso neste aparelho</button>}
       <p role="status" aria-live="polite" className="mt-3 text-sm leading-relaxed">{message}</p>
+    </section>
+    <section className="rounded-2xl border border-border bg-surface p-5">
+      <h2 className="font-semibold">⏰ Um empurrãozinho para seus planos</h2>
+      <p className="mt-2 text-sm leading-relaxed text-muted">Com os avisos ativados, lembramos você no horário de início das atividades, no fuso de Brasília. Só você recebe os lembretes da sua agenda.</p>
+      <p className="mt-2 text-sm leading-relaxed text-muted">Defina um horário de início ao planejar. Atividades sem horário, canceladas ou já concluídas não geram novos lembretes. Se reagendar, usamos o novo horário.</p>
+      <p className="mt-2 text-xs leading-relaxed text-muted">A verificação acontece a cada minuto. Pode haver atraso de rede ou do aparelho; lembretes vencem 15 minutos após o início. Um aviso já enviado pode continuar visível mesmo após concluir ou reagendar.</p>
     </section>
     <section className="rounded-2xl border border-border p-5">
       <h2 className="flex items-center gap-2 font-semibold"><Smartphone size={20} /> Como ativar no iPhone</h2>

@@ -20,6 +20,7 @@ export default async function AgendaPage({
       <header className="page-header">
         <p className="eyebrow">Dê espaço ao que importa</p>
         <h1>Minha agenda</h1>
+        <p className="mt-2 text-sm text-muted">Defina um horário de início e ative os avisos para receber um lembrete ⏰</p>
       </header>
       <Agenda
         key={`${day}-${view}`}

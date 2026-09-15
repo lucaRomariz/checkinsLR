@@ -31,11 +31,15 @@ Deno.serve(async (req: Request) => {
       try {
         if (!allowedEndpoint(sub.endpoint)) status = 400;
         else {
-          // Fetch the row again so deleted activities are never deliberately dispatched.
-          const { data: checkin, error: checkinError } = await db.from("checkins").select("id").eq("id", job.checkin_id).maybeSingle();
-          if (checkinError || !checkin) return;
-          const details = webpush.generateRequestDetails({ endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } }, JSON.stringify({ url: `/checkin/${job.checkin_id}`, tag: `checkin-${job.checkin_id}` }), {
-            TTL: 3600, urgency: "normal", vapidDetails: { subject: config.subject, publicKey: config.publicKey, privateKey: config.privateKey },
+          const { data: payload, error: payloadError } = await db.rpc("push_delivery_payload", { p_delivery_id: job.id });
+          if (payloadError) return; // Retry after the lease expires.
+          if (!payload) {
+            await db.from("push_deliveries").update({ status: "failed", last_status: 204 }).eq("id", job.id);
+            return; // Completed, cancelled, rescheduled, expired or deleted.
+          }
+          const details = webpush.generateRequestDetails({ endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } }, JSON.stringify(payload), {
+            TTL: payload.ttl, urgency: payload.kind === "agenda" ? "high" : "normal",
+            vapidDetails: { subject: config.subject, publicKey: config.publicKey, privateKey: config.privateKey },
           });
           // Do not follow redirects from user-provided endpoints.
           const response = await fetch(details.endpoint, { method: "POST", headers: details.headers, body: details.body, redirect: "error", signal: AbortSignal.timeout(10000) });

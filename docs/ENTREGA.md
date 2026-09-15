@@ -43,7 +43,7 @@ Subir arquivos para hospedagem estática não é suficiente: este projeto usa re
 
 ## Limitações e operação
 
-- A agenda permite planejar cada ocorrência; repetição automática semanal e notificações não fazem parte desta versão.
+- A agenda permite planejar cada ocorrência; repetição automática semanal não está incluída. Web push e lembretes de início estão implementados localmente e dependem da ativação descrita no README.
 - Proteção contra senhas vazadas permanece desativada no Auth e precisa ser configurada no painel, conforme disponibilidade do plano.
 - Fotos aceitas: JPG, PNG e WebP, reduzidas antes do envio; até 5 MB no bucket. Uma falha de rede ambígua preserva o upload para nova tentativa. Arquivos abandonados nesse caso podem precisar de limpeza operacional futura.
 - Links de fotos expiram após uma hora: recarregar a página renova os links.

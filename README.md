@@ -62,3 +62,18 @@ Consulte [entrega e publicação](docs/ENTREGA.md) para configuração, validaç
 - Para validar a entrega completa, ative em uma conta e publique um check-in com outra. No iPhone, abra o app instalado na tela inicial.
 
 Nesta continuação, não houve deploy nem validação de entrega em aparelho físico.
+
+## Lembretes da agenda
+
+Com as notificações do aparelho ativadas, atividades com horário de início geram um lembrete privado para seu proprietário. A verificação roda a cada minuto, no fuso `America/Sao_Paulo`. Não há aviso para atividades sem horário, canceladas ou concluídas. Reagendamentos invalidam os envios pendentes do horário anterior. Um aviso já entregue não pode ser recolhido do aparelho.
+
+Os lembretes são válidos até 15 minutos após o início; o TTL enviado ao provedor respeita o tempo restante. Há deduplicação por atividade, aparelho e horário. O aviso usa texto genérico para não expor o título privado na tela bloqueada e abre `/agenda?date=AAAA-MM-DD`.
+
+### Ativar no ambiente publicado
+
+1. Aplicar as migrações pendentes de web push e `20260915124414_agenda_push_reminders.sql`, respeitando a ordem do histórico.
+2. Publicar a versão atualizada de `supabase/functions/web-push/index.ts`, mantendo a autenticação pelo segredo do worker e os segredos de Vault documentados acima.
+3. Publicar o frontend e o service worker atualizados. Abrir Avisos no aparelho para registrar/atualizar o worker e ativar notificações.
+4. Criar uma atividade própria alguns minutos à frente e verificar entrega e abertura do dia correto; repetir com uma atividade cancelada e outra concluída antes do horário.
+
+Validação desta implementação: testes de payload/navegação e datas, TypeScript e suíte SQL `tests/agenda-push.sql` executada em transação com rollback. Essa suíte deve ser envolvida em `BEGIN`/`ROLLBACK` e executada inteira em ambiente com as duas migrações; não executá-la parcialmente. O banco conectado ainda não recebeu as migrações de push em caráter permanente; nenhum deploy foi feito nesta etapa.
