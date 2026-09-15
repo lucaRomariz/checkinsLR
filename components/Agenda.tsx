@@ -5,6 +5,12 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import {
   CalendarDays,
+  Clock3,
+  Pencil,
+  RotateCcw,
+  CircleX,
+  CircleCheck,
+  ArrowRight,
   Check,
   ChevronLeft,
   ChevronRight,
@@ -232,7 +238,7 @@ export default function Agenda({
             {(["day", "week"] as const).map((v) => (
               <Link
                 key={v}
-                className={`rounded-lg px-3 py-2 text-sm ${v === view ? "bg-surface2 text-white" : "text-muted"}`}
+                className={`rounded-lg px-3 py-2 text-sm ${v === view ? "bg-surface2 text-accent" : "text-muted"}`}
                 href={`/agenda?date=${day}&view=${v}`}
               >
                 {v === "day" ? "Dia" : "Semana"}
@@ -316,7 +322,8 @@ export default function Agenda({
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
-                      <p className="mb-1 text-xs text-muted">
+                      <p className="mb-1 flex items-center gap-1.5 text-xs text-muted">
+                        <Clock3 size={13} aria-hidden="true" />
                         {item.start_time
                           ? `${item.start_time.slice(0, 5)}${item.end_time ? " – " + item.end_time.slice(0, 5) : ""}`
                           : "Sem horário definido"}
@@ -359,23 +366,24 @@ export default function Agenda({
                           <button
                             disabled={busy}
                             onClick={() => open(item)}
-                            className="touch-target rounded-lg px-2 text-muted hover:bg-surface2 hover:text-white"
+                            className="touch-target inline-flex items-center gap-1.5 rounded-lg px-2 text-muted hover:bg-surface2 hover:text-accent"
                           >
-                            Editar
+                            <Pencil size={14} /> Editar
                           </button>
                           <button
                             disabled={busy}
                             onClick={() => cancel(item)}
-                            className="touch-target rounded-lg px-2 text-muted hover:bg-surface2 hover:text-white"
+                            className="touch-target inline-flex items-center gap-1.5 rounded-lg px-2 text-muted hover:bg-surface2 hover:text-accent"
                           >
+                            {item.cancelled ? <RotateCcw size={14} /> : <CircleX size={14} />}
                             {item.cancelled ? "Reativar" : "Cancelar"}
                           </button>
                           {!item.cancelled && item.planned_date <= today && (
                             <Link
-                              className="touch-target inline-flex items-center justify-center rounded-lg bg-white px-3 py-2 font-medium text-black"
+                              className="touch-target inline-flex items-center justify-center gap-1.5 rounded-lg bg-emerald-300 px-3 py-2 font-medium text-black"
                               href={`/checkin/new?plan=${item.id}`}
                             >
-                              Fazer check-in
+                              <CircleCheck size={15} /> Fazer check-in
                             </Link>
                           )}
                         </>
@@ -392,7 +400,7 @@ export default function Agenda({
           href="/agenda?view=week"
           className="block rounded-xl border border-border p-3 text-center text-sm"
         >
-          Ver minha semana →
+          Ver minha semana <ArrowRight size={16} className="inline" />
         </Link>
       )}
       <p className="text-xs text-muted">

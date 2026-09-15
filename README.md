@@ -58,10 +58,10 @@ Consulte [entrega e publicação](docs/ENTREGA.md) para configuração, validaç
 - Animações de entrada e interação respeitam a preferência de movimento reduzido.
 - Check-ins aceitam foto da galeria ou câmera compatível, com prévia e remoção antes do envio.
 - Em Avisos, ative notificações por aparelho. O botão de teste verifica a apresentação local, não o trajeto pelo servidor.
-- O envio remoto depende da migração `20260915021421_web_push.sql`, da Edge Function `web-push` publicada e dos segredos no Vault: `web_push_public_key`, `web_push_private_key`, `web_push_subject`, `web_push_function_url` e `web_push_worker_secret`. Não exponha as chaves privadas no frontend.
+- O envio remoto depende da migração `20260915130802_web_push.sql`, da Edge Function `web-push` publicada e dos segredos no Vault: `web_push_public_key`, `web_push_private_key`, `web_push_subject`, `web_push_function_url` e `web_push_worker_secret`. Não exponha as chaves privadas no frontend.
 - Para validar a entrega completa, ative em uma conta e publique um check-in com outra. No iPhone, abra o app instalado na tela inicial.
 
-Nesta continuação, não houve deploy nem validação de entrega em aparelho físico.
+O backend de push foi ativado no Supabase em 15/09/2026. A entrega em aparelho físico ainda precisa ser validada.
 
 ## Lembretes da agenda
 
@@ -71,9 +71,9 @@ Os lembretes são válidos até 15 minutos após o início; o TTL enviado ao pro
 
 ### Ativar no ambiente publicado
 
-1. Aplicar as migrações pendentes de web push e `20260915124414_agenda_push_reminders.sql`, respeitando a ordem do histórico.
+1. No projeto existente, as migrações de push já foram aplicadas; não reaplicá-las. Em outro ambiente, seguir a ordem do histórico.
 2. Publicar a versão atualizada de `supabase/functions/web-push/index.ts`, mantendo a autenticação pelo segredo do worker e os segredos de Vault documentados acima.
 3. Publicar o frontend e o service worker atualizados. Abrir Avisos no aparelho para registrar/atualizar o worker e ativar notificações.
 4. Criar uma atividade própria alguns minutos à frente e verificar entrega e abertura do dia correto; repetir com uma atividade cancelada e outra concluída antes do horário.
 
-Validação desta implementação: testes de payload/navegação e datas, TypeScript e suíte SQL `tests/agenda-push.sql` executada em transação com rollback. Essa suíte deve ser envolvida em `BEGIN`/`ROLLBACK` e executada inteira em ambiente com as duas migrações; não executá-la parcialmente. O banco conectado ainda não recebeu as migrações de push em caráter permanente; nenhum deploy foi feito nesta etapa.
+Validação desta implementação: testes de payload/navegação e datas, TypeScript e suíte SQL `tests/agenda-push.sql` executada em transação com rollback. Essa suíte deve ser envolvida em `BEGIN`/`ROLLBACK` e executada inteira em ambiente com as duas migrações; não executá-la parcialmente. As duas migrações foram aplicadas ao banco conectado, a função `web-push` foi publicada e os cinco segredos configurados no Vault. A chamada autenticada do worker retornou HTTP 200 e a chave pública está acessível às contas autenticadas. A fila estava vazia no teste; isso não comprova entrega em aparelho físico.

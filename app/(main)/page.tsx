@@ -1,3 +1,4 @@
+import { Bell, Camera } from "lucide-react";
 import Link from "next/link";
 import Agenda from "@/components/Agenda";
 import { getCategories, getSession } from "@/lib/session";
@@ -24,6 +25,10 @@ export default async function TodayPage() {
           </Link>
         </div>
       </header>
+      <div className="grid grid-cols-1 gap-3 px-5 pt-5 sm:grid-cols-2">
+        <Link href="/checkin/new" className="quick-link"><span className="icon-tile"><Camera size={21} /></span><span className="min-w-0"><strong className="block text-sm">Registrar conquista</strong><span className="text-xs text-muted">Conte como foi, com uma foto</span></span></Link>
+        <Link href="/notifications" className="quick-link"><span className="icon-tile"><Bell size={21} /></span><span className="min-w-0"><strong className="block text-sm">Seus lembretes</strong><span className="text-xs text-muted">Ative os avisos da agenda</span></span></Link>
+      </div>
       <Agenda
         key={day}
         home

@@ -4,6 +4,8 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
   Bell,
+  Menu,
+  Heart,
   CalendarDays,
   Home,
   LayoutList,
@@ -121,16 +123,19 @@ export default function NavShell({
         </div>
       </aside>
       <main className="min-h-screen min-w-0 w-full max-w-2xl border-x border-border/60 pb-28 md:pb-8">
-        <div className="flex flex-wrap justify-end gap-x-3 gap-y-1 border-b border-border/60 mobile-toolbar px-4 text-xs text-muted md:hidden">
-          <ThemePicker />
-          {extra.map((e) => (
-            <Link key={e.href} href={e.href}>
-              {e.label}
-            </Link>
-          ))}
-          <button disabled={leaving} onClick={logout}>
-            Sair
-          </button>
+        <div className="mobile-toolbar flex items-center justify-between gap-2 border-b border-border/60 bg-surface px-4 py-2 md:hidden">
+          <Link href="/" className="flex items-center gap-1.5 font-semibold"><Heart size={18} className="text-emerald-300" /> check-ins.</Link>
+          <div className="flex items-center gap-1">
+            <Link href="/notifications" className="icon-button" aria-label="Notificações"><Bell size={20} /></Link>
+            <details className="relative">
+              <summary className="icon-button cursor-pointer list-none" aria-label="Mais opções"><Menu size={21} /></summary>
+              <div className="absolute right-0 top-full z-50 mt-2 w-60 space-y-1 rounded-2xl border border-border bg-surface p-3 shadow-xl">
+                {extra.map(({ href, label, icon: Icon }) => <Link key={href} href={href} onClick={e => e.currentTarget.closest("details")?.removeAttribute("open")} className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm hover:bg-surface2"><Icon size={17} />{label}</Link>)}
+                <ThemePicker />
+                <button disabled={leaving} onClick={logout} className="flex w-full items-center gap-2 rounded-xl px-3 py-3 text-sm text-muted"><LogOut size={17} />{leaving ? "Saindo…" : "Sair da conta"}</button>
+              </div>
+            </details>
+          </div>
         </div>
         {error && (
           <p role="alert" className="p-3 text-sm text-red-300 md:hidden">

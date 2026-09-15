@@ -164,3 +164,16 @@ nav a[aria-current="page"] { background-color: rgb(52 211 153 / .13); }
 :root:not(.dark) .text-purple-300 { color: #7752a4; }
 :root:not(.dark) .text-pink-300 { color: #a43570; }
 @media (prefers-reduced-motion: reduce) { .page-enter { animation: none; } }
+
+@layer components {
+  .primary-button { @apply inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-emerald-300 px-4 py-3 text-sm font-semibold text-black shadow-sm hover:bg-emerald-400 disabled:opacity-50; }
+  .icon-tile { @apply inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-emerald-400/15 text-emerald-300; }
+  .quick-link { @apply flex min-w-0 items-center gap-3 rounded-2xl border border-border bg-surface p-4 hover:bg-surface2; }
+}
+.login-layout { display: grid; min-height: 100dvh; grid-template-columns: minmax(0, 1fr); }
+.login-story { position: relative; min-height: 340px; overflow: hidden; background: #12201a; }
+@media (min-width: 900px) {
+  .login-layout { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .login-story { min-height: 100dvh; }
+}
+@media (max-width: 599px) { .login-story { min-height: 380px; } }
