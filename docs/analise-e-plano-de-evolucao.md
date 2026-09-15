@@ -1,5 +1,7 @@
 # Análise do Check-ins e proposta de agenda
 
+> Documento histórico da análise. A agenda e as correções foram implementadas posteriormente; consulte [a entrega atual](ENTREGA.md).
+
 Data: 14/09/2026. Escopo: código local completo, compilação de produção, metadados do Supabase e documentação oficial. Esta entrega é um diagnóstico e uma especificação; não altera funcionalidades nem o banco em produção.
 
 ## Atualização após reativação — 14/09/2026

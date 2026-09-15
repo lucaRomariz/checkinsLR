@@ -13,14 +13,14 @@ export default async function TodayPage() {
   return (
     <div>
       <header className="page-header">
-        <p className="eyebrow">Uma atividade de cada vez</p>
+        <p className="eyebrow">Pequenos passos, grandes conquistas ✨</p>
         <div className="flex items-center justify-between gap-3">
-          <h1>Olá, {profile.display_name.split(" ")[0]}</h1>
+          <h1>Oi, {profile.display_name.split(" ")[0]} 👋</h1>
           <Link
             className="rounded-xl border border-border px-3 py-2 text-xs text-muted"
             href="/checkin/new"
           >
-            Check-in avulso
+            ＋ Registrar conquista
           </Link>
         </div>
       </header>

@@ -94,8 +94,9 @@ export default function Agenda({
       item === "new" ? (categories[0]?.id ?? "") : item.category_id,
     );
   }
-  async function save(event: React.FormEvent) {
+  async function save(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    const submitted = new FormData(event.currentTarget);
     if (lock.current) return;
     lock.current = true;
     setBusy(true);
@@ -107,8 +108,8 @@ export default function Agenda({
         p_title: title.trim(),
         p_notes: notes.trim() || null,
         p_date: date,
-        p_start: start || null,
-        p_end: end || null,
+        p_start: String(submitted.get("start") ?? start) || null,
+        p_end: String(submitted.get("end") ?? end) || null,
         p_cancelled: editing && editing !== "new" ? editing.cancelled : false,
       });
       if (err) throw err;
@@ -227,7 +228,7 @@ export default function Agenda({
               <ChevronRight size={20} />
             </Link>
           </div>
-          <div className="flex gap-1 rounded-xl bg-surface p-1">
+          <div className="agenda-period-links flex gap-1 rounded-xl bg-surface p-1">
             {(["day", "week"] as const).map((v) => (
               <Link
                 key={v}
@@ -246,7 +247,7 @@ export default function Agenda({
           </div>
         </div>
       )}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <h2 className="font-semibold">
           {home ? "Planejado para hoje" : "Meu planejamento"}
         </h2>
@@ -314,14 +315,14 @@ export default function Agenda({
                   className={`rounded-2xl border p-4 ${done ? "border-emerald-900/60 bg-emerald-950/15" : "border-border bg-surface"} ${item.cancelled ? "opacity-60" : ""}`}
                 >
                   <div className="flex items-start justify-between gap-3">
-                    <div>
+                    <div className="min-w-0">
                       <p className="mb-1 text-xs text-muted">
                         {item.start_time
                           ? `${item.start_time.slice(0, 5)}${item.end_time ? " – " + item.end_time.slice(0, 5) : ""}`
                           : "Sem horário definido"}
                       </p>
                       <h3
-                        className={`font-medium ${item.cancelled ? "line-through" : ""}`}
+                        className={`break-words font-medium ${item.cancelled ? "line-through" : ""}`}
                       >
                         {item.title}
                       </h3>
@@ -345,10 +346,10 @@ export default function Agenda({
                   )}
                   <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
                     <CategoryBadge category={item.categories} />
-                    <div className="flex items-center gap-3 text-xs">
+                    <div className="flex flex-wrap items-center gap-2 text-xs">
                       {done ? (
                         <Link
-                          className="flex items-center gap-1 text-emerald-300"
+                          className="touch-target flex items-center gap-1 text-emerald-300"
                           href={`/checkin/${item.checkins!.id}`}
                         >
                           <Check size={15} /> Ver check-in
@@ -358,20 +359,20 @@ export default function Agenda({
                           <button
                             disabled={busy}
                             onClick={() => open(item)}
-                            className="text-muted hover:text-white"
+                            className="touch-target rounded-lg px-2 text-muted hover:bg-surface2 hover:text-white"
                           >
                             Editar
                           </button>
                           <button
                             disabled={busy}
                             onClick={() => cancel(item)}
-                            className="text-muted hover:text-white"
+                            className="touch-target rounded-lg px-2 text-muted hover:bg-surface2 hover:text-white"
                           >
                             {item.cancelled ? "Reativar" : "Cancelar"}
                           </button>
                           {!item.cancelled && item.planned_date <= today && (
                             <Link
-                              className="rounded-lg bg-white px-3 py-2 font-medium text-black"
+                              className="touch-target inline-flex items-center justify-center rounded-lg bg-white px-3 py-2 font-medium text-black"
                               href={`/checkin/new?plan=${item.id}`}
                             >
                               Fazer check-in
@@ -400,7 +401,7 @@ export default function Agenda({
       </p>
       {editing && (
         <div
-          className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 p-3 sm:items-center"
+          className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 p-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] sm:items-center"
           role="presentation"
         >
           <section
@@ -468,7 +469,9 @@ export default function Agenda({
                   Início previsto
                   <input
                     type="time"
+                    name="start"
                     value={start}
+                    onInput={(e) => setStart(e.currentTarget.value)}
                     onChange={(e) => setStart(e.target.value)}
                   />
                 </label>
@@ -476,8 +479,10 @@ export default function Agenda({
                   Fim previsto
                   <input
                     type="time"
+                    name="end"
                     min={start || undefined}
                     value={end}
+                    onInput={(e) => setEnd(e.currentTarget.value)}
                     onChange={(e) => setEnd(e.target.value)}
                   />
                 </label>

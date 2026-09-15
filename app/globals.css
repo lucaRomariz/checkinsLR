@@ -4,8 +4,8 @@
 
 html,
 body {
-  background-color: #0a0a0a;
-  color: #e9e9e9;
+  background-color: rgb(var(--bg));
+  color: rgb(var(--accent));
 }
 
 * {
@@ -23,9 +23,9 @@ body {
 input,
 textarea,
 select {
-  background-color: #1c1c1c;
-  border: 1px solid #262626;
-  color: #e9e9e9;
+  background-color: rgb(var(--surface2));
+  border: 1px solid rgb(var(--border));
+  color: rgb(var(--accent));
 }
 
 .spark {
@@ -100,3 +100,67 @@ progress::-webkit-progress-value {
     scroll-behavior: auto !important;
   }
 }
+
+/* Keep forms legible without iOS auto-zoom and provide comfortable touch areas. */
+.touch-target {
+  min-height: 44px;
+}
+.mobile-toolbar {
+  padding-top: env(safe-area-inset-top);
+}
+.mobile-toolbar a,
+.mobile-toolbar button {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}
+@media (max-width: 767px) {
+  input:not([type="checkbox"]),
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+  button,
+  .icon-button {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  .icon-button {
+    min-width: 44px;
+  }
+  .page-header h1 {
+    font-size: 1.375rem;
+  }
+  input[type="date"],
+  input[type="time"] {
+    min-width: 0;
+    max-width: 100%;
+  }
+}
+
+.agenda-period-links a { min-height: 44px; display: inline-flex; align-items: center; }
+
+:root {
+  color-scheme: light;
+  --bg: 250 248 243; --surface: 255 255 255; --surface2: 240 242 235;
+  --border: 214 223 214; --muted: 88 105 97; --accent: 30 51 43;
+}
+:root.dark {
+  color-scheme: dark;
+  --bg: 15 24 23; --surface: 23 36 33; --surface2: 32 47 43;
+  --border: 53 72 64; --muted: 166 185 174; --accent: 238 246 238;
+}
+body { background-image: radial-gradient(ellipse at top left, rgb(110 231 183 / .10), transparent 60%); }
+.page-header { background: linear-gradient(120deg, rgb(110 231 183 / .12), rgb(251 191 36 / .08)); }
+button, a, input, select, textarea { transition: background-color .2s, color .2s, border-color .2s, transform .2s; }
+button:active:not(:disabled) { transform: scale(.97); }
+nav a[aria-current="page"] { background-color: rgb(52 211 153 / .13); }
+.page-enter { animation: arrive .35s ease-out both; }
+@keyframes arrive { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+:root:not(.dark) .text-emerald-300, :root:not(.dark) .text-emerald-400 { color: #087354; }
+:root:not(.dark) .text-red-300 { color: #b42338; }
+:root:not(.dark) .text-amber-300 { color: #865609; }
+:root:not(.dark) .text-blue-300 { color: #245da3; }
+:root:not(.dark) .text-purple-300 { color: #7752a4; }
+:root:not(.dark) .text-pink-300 { color: #a43570; }
+@media (prefers-reduced-motion: reduce) { .page-enter { animation: none; } }

@@ -1,51 +1,64 @@
-# Check-ins — Rede social de rotina e produtividade
+# Check-ins — Planejar, realizar e acompanhar
 
-Rede social privada de check-ins de rotina/produtividade (feed cronológico, categorias,
-ranking por consistência, perfil, configurações administrativas). Sem XP, sem níveis.
+Aplicativo de rotina com foco no celular: agenda pessoal diária/semanal, check-ins vinculados ao planejamento, feed, comentários, curtidas, ranking e configurações administrativas.
 
-## Stack
-Next.js 14 (App Router) + TypeScript + Tailwind · Supabase (Postgres, Auth, Storage, RLS)
+## Rodar
 
-## Backend (já provisionado)
-Um projeto Supabase (`checkins-app`, região `sa-east-1`) já foi criado e configurado com:
-- Tabelas: `profiles`, `categories`, `checkins`, `checkin_likes`, `checkin_comments`, `system_settings`
-- RLS em todas as tabelas
-- Trigger `on_auth_user_created`: cria o `profile` automaticamente no cadastro. Os usernames
-  `luca.romariz` e `roberta.araujo` são promovidos a `ADMIN` automaticamente.
-- RPC `create_checkin`: valida limite diário de postagens, limite por categoria e decide
-  server-side (com lock transacional) se aquele check-in conta para o ranking
-  (`counts_for_ranking`). Nunca confie nessa lógica no frontend.
-- RPC `get_ranking`, `get_streak`, `get_category_stats`: leitura agregada para ranking/perfil.
-- Bucket de Storage `checkin-images` (público para leitura, upload autenticado).
-- 7 categorias iniciais e as configurações padrão (`daily_post_limit=2`,
-  `daily_ranking_limit=1`, etc.) já semeadas em `system_settings`.
-
-As chaves do projeto já estão em `.env.local`.
-
-## Rodando localmente
-```bash
-npm install
+```sh
+npm ci
 npm run dev
 ```
-Abra http://localhost:3000 — a primeira tela é o cadastro/login. Ao criar uma conta com
-username `luca.romariz` ou `roberta.araujo`, o usuário já nasce ADMIN e ganha acesso à
-aba **Configurações**.
 
-## Deploy na Vercel
-1. Suba este repositório no GitHub.
-2. Importe o repo na Vercel.
-3. Configure as variáveis de ambiente `NEXT_PUBLIC_SUPABASE_URL` e
-   `NEXT_PUBLIC_SUPABASE_ANON_KEY` (valores em `.env.local`) no painel do projeto.
-4. Deploy.
+Configure `.env.local` com `NEXT_PUBLIC_SUPABASE_URL` e `NEXT_PUBLIC_SUPABASE_ANON_KEY`. Nunca coloque uma chave secreta ou `service_role` em variável pública. Acesse [a aplicação local](http://localhost:3000).
 
-## Regra central: Feed ≠ Ranking
-Todo check-in aparece no feed. Mas apenas o primeiro check-in "válido" do dia (respeitando o
-limite configurado em Configurações) conta para o ranking — isso é decidido e gravado
-(`counts_for_ranking`) inteiramente dentro da função `create_checkin` no Postgres, então não
-pode ser manipulado pelo cliente.
+## Fluxo principal
 
-## Próximos passos sugeridos
-- Comentários: já existe a tabela/policies; falta a UI de listagem/criação (a página de
-  check-in individual não foi implementada — hoje comentários só têm contagem no feed).
-- Edição/exclusão de check-ins pelo próprio autor ou admin (policies já permitem).
-- Notificações e paginação infinita no feed (hoje limitado a 50 itens mais recentes).
+1. Abra Hoje ou Agenda e toque em **Planejar**.
+2. Escolha atividade, categoria, data e horários previstos.
+3. Toque em **Fazer check-in**, confirme o que realizou e adicione uma foto opcional.
+4. A atividade passa a concluída e o feed identifica o registro como **Do planejamento**.
+
+Atividades concluídas preservam seu planejamento; excluir o check-in pela interface reabre a atividade. A agenda é privada por usuário. Check-ins são compartilhados entre as contas autenticadas do aplicativo. A repetição automática de rotinas não está incluída nesta versão.
+
+## Banco
+
+Supabase com Postgres, Auth, Storage e RLS. O histórico completo está em `supabase/migrations`. A migração `20260914200339_agenda_security` já foi aplicada ao projeto existente.
+
+- `planning_items`: ocorrências privadas, com data, horários previstos e cancelamento.
+- `record_checkin`: criação transacional, idempotente e vinculada à atividade; impede conclusão duplicada.
+- `save_plan`: cria/edita/reagenda/cancela ocorrências próprias ainda não concluídas.
+- `delete_checkin`: exclusão autorizada e reabertura da atividade.
+- `get_feed`: paginação de 20 registros com cursor e contagens agregadas.
+- `get_ranking`, `get_streak`, `get_category_stats`, `get_couple_streak`: leituras autenticadas.
+- `checkin-images`: bucket privado, JPEG/PNG/WebP, até 5 MB. As fotos são reduzidas no navegador e exibidas por links temporários.
+
+Novos cadastros sempre recebem papel USER. Os administradores já existentes foram preservados. A concessão de ADMIN exige operação confiável no banco; o nome de usuário não concede privilégios.
+
+O dia de referência usa `America/Sao_Paulo`. Limite de registros avulsos e pontuação do ranking são independentes da conclusão de planejamentos. O servidor aplica limite adicional de segurança de 100 registros diários por pessoa.
+
+## Verificar
+
+```sh
+npm test
+npm run typecheck
+npm run build
+```
+
+Os testes SQL em `tests/database.sql` e `tests/database-rules.sql` devem ser executados inteiros: possuem `BEGIN`/`ROLLBACK` e desfazem as próprias fixtures. Para teste de concorrência pela API, `tests/integration.cjs` requer uma conta descartável explícita e cria dados nela; consulte os comentários do arquivo antes de executar.
+
+## Publicar
+
+Vercel, preset **Next.js**, variáveis públicas do mesmo projeto Supabase e build `npm run build`. `vercel.json` define São Paulo para as funções. Não é exportação estática e não precisa reaplicar a migração já executada.
+
+Consulte [entrega e publicação](docs/ENTREGA.md) para configuração, validação, limitações e estado da entrega. O [diagnóstico](docs/analise-e-plano-de-evolucao.md) registra a análise anterior às correções.
+
+## Aparência, fotos e avisos
+
+- Seletor de aparência na navegação: claro, escuro ou tema do aparelho, salvo neste navegador.
+- Animações de entrada e interação respeitam a preferência de movimento reduzido.
+- Check-ins aceitam foto da galeria ou câmera compatível, com prévia e remoção antes do envio.
+- Em Avisos, ative notificações por aparelho. O botão de teste verifica a apresentação local, não o trajeto pelo servidor.
+- O envio remoto depende da migração `20260915021421_web_push.sql`, da Edge Function `web-push` publicada e dos segredos no Vault: `web_push_public_key`, `web_push_private_key`, `web_push_subject`, `web_push_function_url` e `web_push_worker_secret`. Não exponha as chaves privadas no frontend.
+- Para validar a entrega completa, ative em uma conta e publique um check-in com outra. No iPhone, abra o app instalado na tela inicial.
+
+Nesta continuação, não houve deploy nem validação de entrega em aparelho físico.

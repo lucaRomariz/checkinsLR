@@ -43,7 +43,7 @@ export default function CheckinForm({
     [preview],
   );
   async function pick(f?: File) {
-    if (!f) return;
+    if (!f || preparing || busy || uploaded.current) return;
     setPreparing(true);
     setError("");
     try {
@@ -56,9 +56,10 @@ export default function CheckinForm({
       setPreparing(false);
     }
   }
-  async function submit(e: React.FormEvent) {
+  async function submit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    if (lock.current) return;
+    const submitted = new FormData(e.currentTarget);
+    if (lock.current || preparing) return;
     lock.current = true;
     setBusy(true);
     setError("");
@@ -88,8 +89,8 @@ export default function CheckinForm({
         p_title: title || null,
         p_description: description || null,
         p_image_url: uploaded.current?.url ?? null,
-        p_start_time: start || null,
-        p_end_time: end || null,
+        p_start_time: String(submitted.get("start") ?? start) || null,
+        p_end_time: String(submitted.get("end") ?? end) || null,
         p_planning_item_id: plan?.id ?? null,
         p_request_id: requestId.current,
       });
@@ -185,7 +186,9 @@ export default function CheckinForm({
             Início
             <input
               type="time"
+              name="start"
               value={start}
+              onInput={(e) => setStart(e.currentTarget.value)}
               onChange={(e) => setStart(e.target.value)}
             />
           </label>
@@ -193,8 +196,10 @@ export default function CheckinForm({
             Fim
             <input
               type="time"
+              name="end"
               min={start || undefined}
               value={end}
+              onInput={(e) => setEnd(e.currentTarget.value)}
               onChange={(e) => setEnd(e.target.value)}
             />
           </label>
@@ -210,30 +215,24 @@ export default function CheckinForm({
           placeholder="Uma conquista, aprendizado ou observação..."
         />
       </label>
-      <label className="field">
-        Foto (opcional)
-        <input
-          disabled={busy || preparing || !!uploaded.current}
-          type="file"
-          accept="image/jpeg,image/png,image/webp"
-          onChange={(e) => pick(e.target.files?.[0])}
-        />
-        <span className="text-xs">
-          JPG, PNG ou WebP. A foto será reduzida antes do envio.
-        </span>
-      </label>
-      {preparing && (
-        <p role="status" className="text-sm text-muted">
-          Preparando foto...
-        </p>
-      )}
-      {preview && (
-        <img
-          src={preview}
-          alt="Foto selecionada para o check-in"
-          className="max-h-72 w-full rounded-xl object-contain"
-        />
-      )}
+      <fieldset disabled={busy || preparing || !!uploaded.current} className="rounded-2xl border border-dashed border-border bg-surface p-4">
+        <legend className="px-2 text-sm font-medium">📸 Uma foto da sua conquista?</legend>
+        <p className="mb-3 text-xs text-muted">Opcional, mas deixa a história ainda mais sua.</p>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <label className="field">Escolher da galeria
+            <input type="file" accept="image/jpeg,image/png,image/webp" onChange={e => { void pick(e.target.files?.[0]); e.target.value = ""; }} />
+          </label>
+          <label className="field">Tirar uma foto
+            <input type="file" accept="image/jpeg,image/png,image/webp" capture="environment" onChange={e => { void pick(e.target.files?.[0]); e.target.value = ""; }} />
+          </label>
+        </div>
+        <p className="mt-3 text-xs text-muted">JPG, PNG ou WebP, até 20 MB. Reduzimos a foto antes de enviar.</p>
+        {preparing && <p role="status" className="mt-3 text-sm text-muted">Preparando sua foto…</p>}
+        {preview && <div className="mt-4 space-y-2">
+          <img src={preview} alt="Foto selecionada para o check-in" className="max-h-72 w-full rounded-xl object-contain" />
+          <button type="button" className="rounded-xl border border-border px-4 py-2 text-sm" onClick={() => { setFile(null); setPreview(""); }}>Remover foto</button>
+        </div>}
+      </fieldset>
       {error && (
         <p role="alert" className="text-sm text-red-300">
           {error}

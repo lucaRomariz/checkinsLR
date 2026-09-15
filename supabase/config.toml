@@ -1,0 +1,3 @@
+[functions.web-push]
+# Worker authenticates x-push-secret against Supabase Vault before claiming jobs.
+verify_jwt = false

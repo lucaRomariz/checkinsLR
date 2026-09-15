@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "test": "node tests/dates.cjs",
+    "test": "node tests/dates.cjs && node tests/push.cjs",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

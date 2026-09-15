@@ -1,7 +1,9 @@
 "use client";
+import ThemePicker from "./ThemePicker";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
+  Bell,
   CalendarDays,
   Home,
   LayoutList,
@@ -33,6 +35,7 @@ export default function NavShell({
     { href: `/profile/${profile.username}`, label: "Perfil", icon: User },
   ];
   const extra = [
+    { href: "/notifications", label: "Avisos", icon: Bell },
     { href: "/ranking", label: "Ranking", icon: Trophy },
     ...(profile.role === "ADMIN"
       ? [{ href: "/settings", label: "Configurações", icon: Settings }]
@@ -42,6 +45,22 @@ export default function NavShell({
     href === "/" ? pathname === "/" : pathname.startsWith(href);
   async function logout() {
     setLeaving(true);
+    // Unsubscribe before sign-out so a shared phone does not keep receiving alerts.
+    try {
+      if ("serviceWorker" in navigator) {
+        const reg = await navigator.serviceWorker.getRegistration("/");
+        const sub = await reg?.pushManager?.getSubscription();
+        if (sub) {
+          const { error: removeError } = await createClient().from("push_subscriptions").delete().eq("endpoint", sub.endpoint);
+          const removed = await sub.unsubscribe();
+          if (removeError && !removed) throw new Error("unsubscribe");
+        }
+      }
+    } catch {
+      setError("Não foi possível desligar os avisos deste aparelho. Tente sair novamente.");
+      setLeaving(false);
+      return;
+    }
     const { error: err } = await createClient().auth.signOut();
     if (err) {
       setError("Não foi possível sair. Tente novamente.");
@@ -85,6 +104,7 @@ export default function NavShell({
           </Link>
         </div>
         <div>
+          <ThemePicker />
           <p className="mb-3 px-3 text-sm text-muted">{profile.display_name}</p>
           <button
             disabled={leaving}
@@ -101,7 +121,8 @@ export default function NavShell({
         </div>
       </aside>
       <main className="min-h-screen min-w-0 w-full max-w-2xl border-x border-border/60 pb-28 md:pb-8">
-        <div className="flex justify-end gap-4 border-b border-border/60 px-4 py-3 text-xs text-muted md:hidden">
+        <div className="flex flex-wrap justify-end gap-x-3 gap-y-1 border-b border-border/60 mobile-toolbar px-4 text-xs text-muted md:hidden">
+          <ThemePicker />
           {extra.map((e) => (
             <Link key={e.href} href={e.href}>
               {e.label}
@@ -116,7 +137,7 @@ export default function NavShell({
             {error}
           </p>
         )}
-        {children}
+        <div key={pathname} className="page-enter">{children}</div>
       </main>
       <nav
         aria-label="Principal no celular"
@@ -127,7 +148,7 @@ export default function NavShell({
             key={href}
             href={href}
             aria-current={active(href) ? "page" : undefined}
-            className={`flex min-w-16 flex-col items-center gap-1 rounded-lg px-3 py-1 text-xs ${active(href) ? "text-emerald-300" : "text-muted"}`}
+            className={`flex min-h-12 min-w-16 flex-col items-center gap-1 rounded-lg px-3 py-1 text-xs ${active(href) ? "text-emerald-300" : "text-muted"}`}
           >
             <Icon size={21} />
             {label}
