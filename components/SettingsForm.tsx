@@ -101,7 +101,8 @@ export default function SettingsForm({
           {error}
         </p>
       )}
-      {savedAt && <p className="text-xs text-muted">Salvo às {savedAt}</p>}
+      {saving && <p role="status" className="text-sm text-muted">Salvando alteração…</p>}
+      {savedAt && <p role="status" className="text-xs text-muted">Salvo às {savedAt}</p>}
 
       <section>
         <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted">
@@ -113,6 +114,7 @@ export default function SettingsForm({
             <input
               type="number"
               min={1}
+              max={100}
               className="w-16 rounded-lg px-2 py-1 text-center text-sm"
               defaultValue={settings.daily_post_limit ?? "2"}
               onBlur={(e) => saveSetting("daily_post_limit", e.target.value)}
@@ -125,6 +127,7 @@ export default function SettingsForm({
             <input
               type="number"
               min={1}
+              max={100}
               className="w-16 rounded-lg px-2 py-1 text-center text-sm"
               defaultValue={settings.daily_ranking_limit ?? "1"}
               onBlur={(e) => saveSetting("daily_ranking_limit", e.target.value)}
@@ -152,7 +155,7 @@ export default function SettingsForm({
             <span className="text-sm">Período padrão</span>
             <select
               className="rounded-lg px-2 py-1 text-sm"
-              defaultValue={settings.ranking_default_period ?? "week"}
+              value={settings.ranking_default_period ?? "week"}
               onChange={(e) =>
                 saveSetting("ranking_default_period", e.target.value)
               }
@@ -193,7 +196,9 @@ export default function SettingsForm({
                 <input
                   type="number"
                   min={1}
+                  max={100}
                   className="w-14 rounded-lg px-2 py-1 text-center"
+                  aria-label={`Limite diário de ${c.name}`}
                   defaultValue={c.daily_limit ?? ""}
                   placeholder="—"
                   onBlur={(e) =>
@@ -209,6 +214,7 @@ export default function SettingsForm({
                 <span>Conta para ranking</span>
                 <input
                   type="checkbox"
+                  aria-label={`${c.name} conta para ranking`}
                   checked={c.ranking_enabled}
                   onChange={(e) =>
                     saveCategory(c, { ranking_enabled: e.target.checked })

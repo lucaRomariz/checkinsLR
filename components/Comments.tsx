@@ -60,7 +60,7 @@ export default function Comments({
   }, [load]);
   async function send(e: React.FormEvent) {
     e.preventDefault();
-    if (lock.current || !text.trim()) return;
+    if (lock.current || loading || !text.trim()) return;
     lock.current = true;
     setBusy(true);
     setError("");
@@ -84,7 +84,7 @@ export default function Comments({
     }
   }
   async function remove(id: string) {
-    if (lock.current) return;
+    if (lock.current || loading) return;
     lock.current = true;
     setBusy(true);
     setError("");
@@ -108,13 +108,13 @@ export default function Comments({
     <div className="mt-4 space-y-3 border-t border-border pt-3">
       {comments.map((c) => (
         <div key={c.id} className="flex items-start justify-between gap-2">
-          <p className="break-words text-sm">
+          <p className="min-w-0 break-words text-sm">
             <span className="font-medium">{c.profiles?.display_name}</span>{" "}
             <span className="text-muted">{c.content}</span>
           </p>
           {(c.user_id === currentProfileId || isAdmin) && (
             <button
-              disabled={busy}
+              disabled={busy || loading}
               aria-label="Excluir comentário"
               onClick={() => remove(c.id)}
               className="shrink-0 p-1 text-muted"
@@ -124,12 +124,13 @@ export default function Comments({
           )}
         </div>
       ))}
+      {!loading && !error && !comments.length && <p className="text-sm text-muted">Seja a primeira pessoa a celebrar esta conquista.</p>}
       {loading && (
-        <p className="text-xs text-muted">Carregando comentários...</p>
+        <p role="status" className="text-xs text-muted">Carregando comentários...</p>
       )}
       {hasMore && (
         <button
-          disabled={loading}
+          disabled={loading || busy}
           className="text-xs underline"
           onClick={() => load(comments.length)}
         >
@@ -139,7 +140,7 @@ export default function Comments({
       {error && (
         <p role="alert" className="text-xs text-red-300">
           {error}{" "}
-          <button className="underline" onClick={() => load()}>
+          <button disabled={busy || loading} className="underline" onClick={() => load()}>
             Recarregar
           </button>
         </p>
@@ -150,6 +151,7 @@ export default function Comments({
         </label>
         <input
           id={`comment-${checkinId}`}
+          disabled={busy}
           maxLength={2000}
           value={text}
           onChange={(e) => setText(e.target.value)}
@@ -157,10 +159,10 @@ export default function Comments({
           className="min-w-0 flex-1 rounded-xl p-3 text-sm"
         />
         <button
-          disabled={busy || !text.trim()}
+          disabled={busy || loading || !text.trim()}
           className="rounded-xl bg-white px-3 text-xs text-black disabled:opacity-50"
         >
-          Enviar
+          {busy ? "Aguarde…" : "Enviar"}
         </button>
       </form>
     </div>

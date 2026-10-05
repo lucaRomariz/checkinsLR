@@ -22,8 +22,10 @@ export default async function SettingsPage() {
 
   return (
     <div>
-      <header className="sticky top-0 z-10 border-b border-border/60 bg-bg/95 px-4 py-4 backdrop-blur">
-        <h1 className="text-lg font-semibold">⚙️ Configurações</h1>
+      <header className="page-header">
+        <p className="eyebrow">Do seu jeito</p>
+        <h1>Configurações</h1>
+        <p className="mt-2 text-sm text-muted">Personalize as regras de check-ins, categorias e interações.</p>
       </header>
       <SettingsForm
         initialSettings={(settings as SystemSetting[]) ?? []}

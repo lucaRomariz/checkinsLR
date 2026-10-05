@@ -16,6 +16,7 @@ import {
   ChevronRight,
   Plus,
   X,
+  Search,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { addDays, isOverdue, todayKey, weekStart } from "@/lib/dates";
@@ -38,6 +39,8 @@ export default function Agenda({
   const router = useRouter();
   const lock = useRef(false);
   const dialog = useRef<HTMLElement>(null);
+  const [query, setQuery] = useState("");
+  const [status, setStatus] = useState("all");
   const [editing, setEditing] = useState<PlanningItem | "new" | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -88,12 +91,20 @@ export default function Agenda({
       ? Array.from({ length: 7 }, (_, i) => addDays(weekStart(day), i))
       : [day];
 
-  function open(item: PlanningItem | "new") {
+  const normalize = (value: string) => value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+  const filtered = items.filter(item => {
+    const matches = normalize(`${item.title} ${item.notes ?? ""} ${item.categories?.name ?? ""}`).includes(normalize(query.trim()));
+    return matches && (status === "all" || (status === "done" ? !!item.checkins : status === "cancelled" ? item.cancelled : !item.cancelled && !item.checkins));
+  });
+  const isFiltered = !!query.trim() || status !== "all";
+
+  function open(item: PlanningItem | "new", selectedDay = day) {
     setEditing(item);
     setError(null);
+    setMessage("");
     setTitle(item === "new" ? "" : item.title);
     setNotes(item === "new" ? "" : (item.notes ?? ""));
-    setDate(item === "new" ? day : item.planned_date);
+    setDate(item === "new" ? selectedDay : item.planned_date);
     setStart(item === "new" ? "" : (item.start_time?.slice(0, 5) ?? ""));
     setEnd(item === "new" ? "" : (item.end_time?.slice(0, 5) ?? ""));
     setCategoryId(
@@ -173,7 +184,7 @@ export default function Agenda({
   }
   return (
     <div className="space-y-5 p-5">
-      <section className="rounded-2xl border border-emerald-800/40 bg-gradient-to-br from-emerald-950/50 to-surface p-5">
+      <section className="agenda-summary rounded-2xl p-5">
         <p className="eyebrow">
           {view === "week" ? "Sua semana" : "Seu dia"}, no seu ritmo
         </p>
@@ -238,6 +249,7 @@ export default function Agenda({
             {(["day", "week"] as const).map((v) => (
               <Link
                 key={v}
+                aria-current={v === view ? "page" : undefined}
                 className={`rounded-lg px-3 py-2 text-sm ${v === view ? "bg-surface2 text-accent" : "text-muted"}`}
                 href={`/agenda?date=${day}&view=${v}`}
               >
@@ -259,7 +271,7 @@ export default function Agenda({
         </h2>
         <button
           className="flex items-center gap-1 rounded-xl bg-emerald-400 px-3 py-2 text-sm font-semibold text-black disabled:opacity-50"
-          disabled={!categories.length}
+          disabled={busy || !categories.length}
           onClick={() => open("new")}
         >
           <Plus size={16} /> Planejar
@@ -280,7 +292,23 @@ export default function Agenda({
           {error}
         </p>
       )}
-      {days.map((d) => (
+      {items.length > 0 && (
+        <div className="space-y-3">
+          <label className="relative block">
+            <span className="sr-only">Buscar atividades</span>
+            <Search size={18} className="pointer-events-none absolute left-3 top-3.5 text-muted" />
+            <input type="search" value={query} onChange={event => setQuery(event.target.value)} placeholder="Buscar atividade ou categoria" className="min-h-12 w-full rounded-xl pl-10 pr-3 text-sm" />
+          </label>
+          <div className="flex flex-wrap gap-2" role="group" aria-label="Filtrar atividades">
+            {[["all", "Todas"], ["pending", "Pendentes"], ["done", "Concluídas"], ["cancelled", "Canceladas"]].map(([value, label]) => (
+              <button key={value} type="button" className="filter-chip" aria-pressed={status === value} onClick={() => setStatus(value)}>{label}</button>
+            ))}
+          </div>
+          {isFiltered && <p role="status" className="text-xs text-muted">{filtered.length} atividade(s) encontrada(s) <button type="button" className="ml-2 underline" onClick={() => { setQuery(""); setStatus("all"); }}>Limpar filtros</button></p>}
+        </div>
+      )}
+      {isFiltered && !filtered.length && <div className="rounded-2xl border border-dashed border-border p-6 text-center text-sm text-muted">Nenhuma atividade corresponde à busca. Experimente outro termo ou limpe os filtros.</div>}
+      {days.filter(d => !isFiltered || filtered.some(p => p.planned_date === d)).map((d) => (
         <section key={d} className="space-y-3">
           {view === "week" && (
             <h3 className="pt-2 text-sm font-semibold">
@@ -300,6 +328,7 @@ export default function Agenda({
                   ? "Dia livre para planejar."
                   : "Seu planejamento começa aqui."}
               </p>
+              <button type="button" disabled={busy || !categories.length} onClick={() => open("new", d)} className="mt-3 inline-flex min-h-11 items-center gap-2 text-sm font-medium text-emerald-300 disabled:opacity-50"><Plus size={16} /> Planejar neste dia</button>
               {view === "day" && (
                 <p className="mt-1 text-xs text-muted">
                   Adicione um treino, estudo, devocional ou outro compromisso.
@@ -307,7 +336,7 @@ export default function Agenda({
               )}
             </div>
           )}
-          {items
+          {filtered
             .filter((p) => p.planned_date === d)
             .map((item) => {
               const done = !!item.checkins;
@@ -318,7 +347,7 @@ export default function Agenda({
               return (
                 <article
                   key={item.id}
-                  className={`rounded-2xl border p-4 ${done ? "border-emerald-900/60 bg-emerald-950/15" : "border-border bg-surface"} ${item.cancelled ? "opacity-60" : ""}`}
+                  className={`rounded-2xl border p-4 ${done ? "border-emerald-400/30 bg-emerald-400/5" : "border-border bg-surface"} ${item.cancelled ? "opacity-60" : ""}`}
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
@@ -434,7 +463,8 @@ export default function Agenda({
                 <X size={20} />
               </button>
             </div>
-            <form className="space-y-4" onSubmit={save}>
+            <form onSubmit={save} aria-busy={busy}>
+              <fieldset disabled={busy} className="space-y-4">
               <label className="field">
                 Atividade
                 <input
@@ -516,6 +546,7 @@ export default function Agenda({
               >
                 {busy ? "Salvando..." : "Salvar planejamento"}
               </button>
+              </fieldset>
             </form>
           </section>
         </div>

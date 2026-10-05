@@ -91,8 +91,10 @@ export default function RankingPage({
 
   return (
     <div>
-      <header className="sticky top-0 z-10 border-b border-border/60 bg-bg/95 px-4 py-4 backdrop-blur">
-        <h1 className="text-lg font-semibold">🏆 Classificação</h1>
+      <header className="page-header">
+        <p className="eyebrow">Cada passo conta</p>
+        <h1>Classificação</h1>
+        <p className="mt-2 text-sm text-muted">Acompanhe a constância e celebre as conquistas de todos.</p>
       </header>
 
       <div className="space-y-3 border-b border-border/60 px-4 py-3">
@@ -100,6 +102,7 @@ export default function RankingPage({
           {(Object.keys(PERIOD_LABELS) as Period[]).map((p) => (
             <button
               key={p}
+              aria-pressed={period === p}
               onClick={() => setPeriod(p)}
               className={`whitespace-nowrap rounded-full px-3 py-1.5 text-xs transition ${
                 period === p ? "bg-white text-black" : "bg-surface2 text-muted"
@@ -112,6 +115,7 @@ export default function RankingPage({
         <div className="flex gap-2 overflow-x-auto">
           <button
             onClick={() => setCategoryId("all")}
+            aria-pressed={categoryId === "all"}
             className={`whitespace-nowrap rounded-full px-3 py-1.5 text-xs transition ${
               categoryId === "all"
                 ? "bg-white text-black"
@@ -124,6 +128,7 @@ export default function RankingPage({
             categories.map((c) => (
               <button
                 key={c.id}
+                aria-pressed={categoryId === c.id}
                 onClick={() => setCategoryId(c.id)}
                 className={`whitespace-nowrap rounded-full px-3 py-1.5 text-xs transition ${
                   categoryId === c.id
@@ -143,7 +148,7 @@ export default function RankingPage({
         </p>
       )}
       {loading && (
-        <p className="px-4 py-8 text-center text-sm text-muted">
+        <p role="status" className="px-4 py-8 text-center text-sm text-muted">
           Carregando...
         </p>
       )}
@@ -154,15 +159,15 @@ export default function RankingPage({
         </p>
       )}
 
-      <ul>
-        {rows.map((row, i) => (
+      <ul aria-label="Classificação do período" aria-busy={loading}>
+        {!loading && !error && rows.map((row, i) => (
           <li
             key={row.user_id}
             className="flex items-center justify-between border-b border-border/60 px-4 py-3"
           >
             <Link
               href={`/profile/${row.username}`}
-              className="flex items-center gap-3"
+              className="flex min-w-0 items-center gap-3"
             >
               <span className="w-6 text-center text-sm">
                 {medals[i] ?? i + 1}
@@ -170,9 +175,9 @@ export default function RankingPage({
               <span className="flex h-8 w-8 items-center justify-center rounded-full bg-surface2 text-xs uppercase">
                 {row.display_name.slice(0, 2)}
               </span>
-              <span className="text-sm font-medium">{row.display_name}</span>
+              <span className="break-words text-sm font-medium">{row.display_name}</span>
             </Link>
-            <span className="text-sm text-muted">
+            <span className="ml-3 shrink-0 text-sm text-muted">
               {row.checkin_count} check-ins
             </span>
           </li>

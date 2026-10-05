@@ -95,16 +95,16 @@ export default function CheckinCard({
   }
   if (deleted) return null;
   return (
-    <article className="border-b border-border/60 px-5 py-5">
+    <article className="mx-4 my-4 rounded-2xl border border-border bg-surface p-4 sm:mx-5 sm:p-5">
       <div className="mb-3 flex items-center justify-between gap-2">
         <Link
           href={`/profile/${checkin.profiles?.username}`}
-          className="flex items-center gap-2 text-sm font-medium"
+          className="flex min-w-0 items-center gap-2 text-sm font-medium"
         >
-          <span className="flex h-9 w-9 items-center justify-center rounded-full bg-surface2 text-xs uppercase">
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-surface2 text-xs uppercase">
             {checkin.profiles?.display_name.slice(0, 2)}
           </span>
-          {checkin.profiles?.display_name}
+          <span className="break-words">{checkin.profiles?.display_name}</span>
         </Link>
         <div className="flex items-center gap-3">
           <time className="text-xs text-muted" dateTime={checkin.created_at}>
@@ -142,7 +142,7 @@ export default function CheckinCard({
           className="mb-3 aspect-[4/3] w-full rounded-2xl object-cover"
         />
       )}
-      {checkin.title && <h2 className="mb-2 font-medium">{checkin.title}</h2>}
+      {checkin.title && <h2 className="mb-2 break-words font-medium">{checkin.title}</h2>}
       {checkin.description && (
         <p className="mb-3 whitespace-pre-wrap break-words text-sm text-muted">
           {checkin.description}

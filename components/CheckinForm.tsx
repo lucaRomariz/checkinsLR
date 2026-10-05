@@ -123,7 +123,8 @@ export default function CheckinForm({
     }
   }
   return (
-    <form onSubmit={submit} className="space-y-5 p-5">
+    <form onSubmit={submit} className="p-5" aria-busy={busy}>
+      <fieldset disabled={busy} className="min-w-0 space-y-5">
       {plan && (
         <div className="rounded-xl border border-emerald-900 bg-emerald-950/20 p-4">
           <p className="text-sm font-medium text-emerald-300">
@@ -254,9 +255,10 @@ export default function CheckinForm({
             ? "Concluir atividade e publicar"
             : "Publicar check-in"}
       </button>
+      </fieldset>
       <Link
-        className="block text-center text-sm text-muted"
-        href={plan ? "/agenda" : "/"}
+        className="mt-5 block text-center text-sm text-muted"
+        href={plan ? `/agenda?date=${plan.planned_date}` : "/"}
       >
         Voltar
       </Link>

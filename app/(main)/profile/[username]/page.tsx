@@ -45,8 +45,9 @@ export default async function ProfilePage({
 
   return (
     <div>
-      <header className="sticky top-0 z-10 border-b border-border/60 bg-bg/95 px-4 py-4 backdrop-blur">
-        <h1 className="text-lg font-semibold">Perfil</h1>
+      <header className="page-header">
+        <p className="eyebrow">Sua jornada em pequenos passos</p>
+        <h1>Perfil</h1>
       </header>
 
       <div className="flex flex-col items-center gap-2 px-4 py-8 text-center">

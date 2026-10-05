@@ -4,7 +4,7 @@ import { getSession } from "@/lib/session";
 export default async function NotificationsPage() {
   await getSession();
   return <div>
-    <header className="border-b border-border/60 px-4 py-4"><h1 className="text-lg font-semibold">Notificações</h1></header>
+    <header className="page-header"><p className="eyebrow">Um lembrete para o que importa</p><h1>Notificações</h1><p className="mt-2 text-sm text-muted">Escolha como acompanhar sua agenda e as novas conquistas.</p></header>
     <PushSettings />
   </div>;
 }
